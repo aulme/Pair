@@ -1,4 +1,5 @@
 $baseEmail =  "test@gmail.com"
+$noone = "no one"
 
 # Public
 Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {  
@@ -26,7 +27,7 @@ Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {
 }
 
 Function Get-Pair () {
-    $currentPair = safeGetEnvVar("GIT_AUTHOR_NAME", "no one")
+    $currentPair = safeGetEnvVar "GIT_AUTHOR_NAME" $noone
     return "Currently pairing: $currentPair"
 }
 
@@ -39,7 +40,7 @@ Function Get-PairFile {
 }
 
 Function Get-PairAliases {
-    $currentPair = (safeGetEnvVar "env:GIT_AUTHOR_ALIASES" "no one").value
+    $currentPair = safeGetEnvVar "env:GIT_AUTHOR_ALIASES" $noone
     return $currentPair
 }
 
@@ -73,7 +74,6 @@ Function updateUserData($name, $email, $aliases) {
     git config --global user.name $name
     git config --global user.email $email    
 }
-
 
 Function makeEmail($baseEmail, $aliases) {    
     $emailParts = $baseEmail -split "@"
@@ -131,10 +131,5 @@ Function setLocalEnvVar($name, $value) {
     New-Item "env:" -Force -name $name -value $value
 }
 
-reloadVariable "GIT_AUTHOR_NAME" "no one"
-reloadVariable "GIT_AUTHOR_ALIASES" "no one"
-reloadVariable "GIT_AUTHOR_EMAIL" "noone@gmail.com"
-
 Set-Alias pair Set-Pair
-
 Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
