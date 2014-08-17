@@ -1,23 +1,13 @@
+Export-ModuleMember Get-PairAliases
+Export-ModuleMember Get-PairFile
+Export-ModuleMember Set-PairFile
+Export-ModuleMember Set-Pair
+Export-ModuleMember Get-Pair
+
 $baseEmail =  "test@gmail.com"
 
-Function Set-PairFile ($path) {
-	setEnvVar "PAIR_FILE_PATH" $path
-}
-
-Function Get-PairFile {
-	return safeGetEnvVar "PAIR_FILE_PATH" "$home\gitUsers.csv"
-}
-
-Function story ($story) {
-	if($story) {
-		setEnvVar "CURRENT_STORY" $story
-		return
-	}
-	
-	return safeGetEnvVar "CURRENT_STORY" "No story"
-}
-
-Function pair ($alias1, $alias2, $alias3, $alias4) {  
+# Public
+Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {  
     if($alias4) {
         "More then 3 people ""pairing""? You're crazy."
         return
@@ -38,7 +28,20 @@ Function pair ($alias1, $alias2, $alias3, $alias4) {
         return
     }
     
-    echo (getPair);
+    echo (Get-Pair);
+}
+
+Function Get-Pair () {
+    $currentPair = getEnvVar("GIT_AUTHOR_NAME")
+    return "Currently pairing: $currentPair"
+}
+
+Function Set-PairFile ($path) {
+    setEnvVar "PAIR_FILE_PATH" $path
+}
+
+Function Get-PairFile {
+    return safeGetEnvVar "PAIR_FILE_PATH" "$home\gitUsers.csv"
 }
 
 Function Get-PairAliases {
@@ -46,6 +49,7 @@ Function Get-PairAliases {
     return $currentPair
 }
 
+# Private
 Function setSingle ($alias1) {
     $pairEmail = makeEmail $baseEmail @($alias1)
     $pairName = (lookupName $alias1) + " on " + [Environment]::UserName
@@ -76,31 +80,6 @@ Function updateUserData($name, $email, $aliases) {
     git config --global user.email $email    
 }
 
-Function safeGetEnvVar($varName, $default) {
-	if (Test-Path "env:$varName") {
-		return getEnvVar $varName
-	}
-	
-	return $default
-}
-
-Function getEnvVar($varName) {
-    return (Get-Item "env:$varName").value
-}
-
-Function getPair() {
-    $currentPair = getEnvVar("GIT_AUTHOR_NAME")
-    return "Currently pairing: $currentPair"
-}
-
-Function setEnvVar($name, $value) {
-    setLocalEnvVar $name $value
-    [Environment]::SetEnvironmentVariable($name, $value, "User")
-}
-
-Function setLocalEnvVar($name, $value) {
-    New-Item "env:" -Force -name $name -value $value
-}
 
 Function makeEmail($baseEmail, $aliases) {    
     $emailParts = $baseEmail -split "@"
@@ -130,9 +109,31 @@ function reloadVariable($varName) {
     setLocalEnvVar $varName ([Environment]::GetEnvironmentVariable($varName, "User"))
 }
 
+# Util
+
+Function safeGetEnvVar($varName, $default) {
+    if (Test-Path "env:$varName") {
+        return getEnvVar $varName
+    }
+    
+    return $default
+}
+
+Function getEnvVar($varName) {
+    return (Get-Item "env:$varName").value
+}
+
+Function setEnvVar($name, $value) {
+    setLocalEnvVar $name $value
+    [Environment]::SetEnvironmentVariable($name, $value, "User")
+}
+
+Function setLocalEnvVar($name, $value) {
+    New-Item "env:" -Force -name $name -value $value
+}
+
+Export-ModuleMember *
+
 reloadVariable "GIT_AUTHOR_NAME"
 reloadVariable "GIT_AUTHOR_ALIASES"
 reloadVariable "GIT_AUTHOR_EMAIL"
-
-Export-ModuleMember *pair*
-Export-ModuleMember *story`*
