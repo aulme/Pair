@@ -1,9 +1,3 @@
-Export-ModuleMember Get-PairAliases
-Export-ModuleMember Get-PairFile
-Export-ModuleMember Set-PairFile
-Export-ModuleMember Set-Pair
-Export-ModuleMember Get-Pair
-
 $baseEmail =  "test@gmail.com"
 
 # Public
@@ -32,7 +26,7 @@ Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {
 }
 
 Function Get-Pair () {
-    $currentPair = getEnvVar("GIT_AUTHOR_NAME")
+    $currentPair = safeGetEnvVar("GIT_AUTHOR_NAME", "no one")
     return "Currently pairing: $currentPair"
 }
 
@@ -45,7 +39,7 @@ Function Get-PairFile {
 }
 
 Function Get-PairAliases {
-    $currentPair = (Get-Item "env:GIT_AUTHOR_ALIASES").value
+    $currentPair = (safeGetEnvVar "env:GIT_AUTHOR_ALIASES" "no one").value
     return $currentPair
 }
 
@@ -105,12 +99,17 @@ function addToLookup($initials, $name) {
     Select-Object $initials, $name
 }
 
-function reloadVariable($varName) {
-    setLocalEnvVar $varName ([Environment]::GetEnvironmentVariable($varName, "User"))
+function reloadVariable($varName, $default) {
+    $value = ([Environment]::GetEnvironmentVariable($varName, "User"))
+
+    if ($value -eq $null) {
+        $value = $default
+    }
+
+    setLocalEnvVar $varName $value
 }
 
 # Util
-
 Function safeGetEnvVar($varName, $default) {
     if (Test-Path "env:$varName") {
         return getEnvVar $varName
@@ -132,8 +131,10 @@ Function setLocalEnvVar($name, $value) {
     New-Item "env:" -Force -name $name -value $value
 }
 
-Export-ModuleMember *
+reloadVariable "GIT_AUTHOR_NAME" "no one"
+reloadVariable "GIT_AUTHOR_ALIASES" "no one"
+reloadVariable "GIT_AUTHOR_EMAIL" "noone@gmail.com"
 
-reloadVariable "GIT_AUTHOR_NAME"
-reloadVariable "GIT_AUTHOR_ALIASES"
-reloadVariable "GIT_AUTHOR_EMAIL"
+Set-Alias pair Set-Pair
+
+Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
