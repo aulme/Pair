@@ -42,8 +42,7 @@ Function Get-PairFile {
 }
 
 Function Get-PairAliases {
-    $currentPair = safeGetEnvVar "env:GIT_AUTHOR_ALIASES" $noOne
-    return $currentPair
+    return safeGetEnvVar "GIT_AUTHOR_ALIASES" $noOne
 }
 
 # Private
@@ -136,5 +135,9 @@ Function setLocalEnvVar($name, $value) {
 
 Set-Alias pair Set-Pair
 
-Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
-Export-ModuleMember -Alias *
+reloadVariable "GIT_AUTHOR_NAME"
+reloadVariable "GIT_AUTHOR_EMAIL"
+reloadVariable "GIT_AUTHOR_ALIASES"
+
+#Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
+#Export-ModuleMember -Alias *
