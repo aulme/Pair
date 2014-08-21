@@ -139,5 +139,5 @@ reloadVariable "GIT_AUTHOR_NAME"
 reloadVariable "GIT_AUTHOR_EMAIL"
 reloadVariable "GIT_AUTHOR_ALIASES"
 
-#Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
-#Export-ModuleMember -Alias *
+Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair
+Export-ModuleMember -Alias *
