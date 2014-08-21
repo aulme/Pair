@@ -1,5 +1,6 @@
 $baseEmail =  "test@gmail.com"
-$noone = "no one"
+$noOne = "no one"
+$defaultPairFile = "$PSScriptRoot\defaultPairFile.csv"
 
 # Public
 Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {  
@@ -27,7 +28,7 @@ Function Set-Pair ($alias1, $alias2, $alias3, $alias4) {
 }
 
 Function Get-Pair () {
-    $currentPair = safeGetEnvVar "GIT_AUTHOR_NAME" $noone
+    $currentPair = safeGetEnvVar "GIT_AUTHOR_NAME" $noOne
     return "Currently pairing: $currentPair"
 }
 
@@ -36,20 +37,22 @@ Function Set-PairFile ($path) {
 }
 
 Function Get-PairFile {
-    return safeGetEnvVar "PAIR_FILE_PATH" "$home\gitUsers.csv"
+    $pairFile = safeGetEnvVar "PAIR_FILE_PATH" $defaultPairFile
+    return $pairFile
 }
 
 Function Get-PairAliases {
-    $currentPair = safeGetEnvVar "env:GIT_AUTHOR_ALIASES" $noone
+    $currentPair = safeGetEnvVar "env:GIT_AUTHOR_ALIASES" $noOne
     return $currentPair
 }
 
 # Private
 Function setSingle ($alias1) {
     $pairEmail = makeEmail $baseEmail @($alias1)
-    $pairName = (lookupName $alias1) + " on " + [Environment]::UserName
+    $pairName = (lookupName $alias1) 
+    $machineName = [Environment]::UserName
     updateUserData $pairName $pairEmail $alias1
-    echo "$pairName is working alone now"
+    echo "$pairName is working alone on '$machineName' now"
 }
 
 Function setDouble ($alias1, $alias2) {
@@ -132,4 +135,6 @@ Function setLocalEnvVar($name, $value) {
 }
 
 Set-Alias pair Set-Pair
+
 Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair -Alias *
+Export-ModuleMember -Alias *
