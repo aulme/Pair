@@ -1,4 +1,4 @@
-$baseEmail =  "test@gmail.com"
+$defaultBaseEmail =  "no_email_set@gmail.com"
 $noOne = "no one"
 $defaultPairFile = "$PSScriptRoot\defaultPairFile.csv"
 
@@ -32,8 +32,17 @@ Function Get-Pair () {
     return "Currently pairing: $currentPair"
 }
 
+Function Get-BaseEmail () {
+    return safeGetEnvVar "PAIR_BASE_EMAIL" $defaultBaseEmail
+}
+
+Function Set-BaseEmail ($baseEmail) {    
+    setEnvVar "PAIR_BASE_EMAIL" $baseEmail
+}
+
 Function Set-PairFile ($path) {
-    setEnvVar "PAIR_FILE_PATH" $path
+    $fullPath = Resolve-Path $path
+    setEnvVar "PAIR_FILE_PATH" $fullPath
 }
 
 Function Get-PairFile {
@@ -47,7 +56,7 @@ Function Get-PairAliases {
 
 # Private
 Function setSingle ($alias1) {
-    $pairEmail = makeEmail $baseEmail @($alias1)
+    $pairEmail = makeEmail (Get-BaseEmail) @($alias1)
     $pairName = (lookupName $alias1) 
     $machineName = [Environment]::UserName
     updateUserData $pairName $pairEmail $alias1
@@ -56,14 +65,14 @@ Function setSingle ($alias1) {
 
 Function setDouble ($alias1, $alias2) {
     $pairName = (lookupName $alias1) + " and " + (lookupName $alias2) + " on " + [Environment]::UserName
-    $pairEmail = makeEmail $baseEmail @($alias1, $alias2)
+    $pairEmail = makeEmail (Get-BaseEmail) @($alias1, $alias2)
     updateUserData $pairName $pairEmail ($alias1, $alias2)    
     echo "$pairName are pairing now"
 }
 
 Function setTripple ($alias1, $alias2, $alias3) {
     $pairName = (lookupName $alias1) + ", " + (lookupName $alias2) + " and " + (lookupName $alias3) + " on " + [Environment]::UserName
-    $pairEmail = makeEmail $baseEmail @($alias1, $alias2, $alias3)
+    $pairEmail = makeEmail (Get-BaseEmail) @($alias1, $alias2, $alias3)
     updateUserData $pairName $pairEmail ($alias1, $alias2, $alias3)
     
     echo "$pairName are trippling now"
@@ -138,6 +147,8 @@ Set-Alias pair Set-Pair
 reloadVariable "GIT_AUTHOR_NAME"
 reloadVariable "GIT_AUTHOR_EMAIL"
 reloadVariable "GIT_AUTHOR_ALIASES"
+reloadVariable "PAIR_BASE_EMAIL"
+reloadVariable "PAIR_FILE_PATH"
 
-Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair
+Export-ModuleMember -Function Set-Pair, Get-PairFile, Set-PairFile, Get-PairAliases, Get-Pair, Set-BaseEmail, Get-BaseEmail
 Export-ModuleMember -Alias *
