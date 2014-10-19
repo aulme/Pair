@@ -110,14 +110,12 @@ function addToLookup($initials, $name) {
     Select-Object $initials, $name
 }
 
-function reloadVariable($varName, $default) {
+function reloadVariable($varName) {
     $value = ([Environment]::GetEnvironmentVariable($varName, "User"))
 
-    if ($value -eq $null) {
-        $value = $default
-    }
-
-    setLocalEnvVar $varName $value
+    if ($value -ne $null) {
+        setLocalEnvVar $varName $value
+    }    
 }
 
 # Util
