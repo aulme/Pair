@@ -7,7 +7,7 @@ Pair is a PowerShell module. It allows you to quickly change the git user name a
 
 Compatible with PowerShell 2+.
 
-##Spec
+## Spec
 &nbsp; | &nbsp;
 ------ | -----
 | Given | John Doe and Jack Common are pairing today |
